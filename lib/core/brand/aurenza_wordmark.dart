@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/aurenza_colors.dart';
+import 'aurenza_logo.dart';
 
 class AurenzaWordmark extends StatelessWidget {
   final bool compact;
