@@ -12,7 +12,7 @@ abstract final class AurenzaSupabase {
 
     await Supabase.initialize(
       url: SupabaseConfig.url,
-      anonKey: SupabaseConfig.anonKey,
+      publishableKey: SupabaseConfig.publishableKey,
     );
 
     return true;

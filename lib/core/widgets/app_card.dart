@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/aurenza_radius.dart';
 
 class AppCard extends StatelessWidget {
   final Widget child;

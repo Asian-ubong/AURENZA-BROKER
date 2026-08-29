@@ -8,13 +8,13 @@ class SupabaseConfig {
     defaultValue: '',
   );
 
-  static const anonKey = String.fromEnvironment(
+  static const publishableKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
   );
 
   static bool get isConfigured =>
-      url.trim().isNotEmpty && anonKey.trim().isNotEmpty;
+      url.trim().isNotEmpty && publishableKey.trim().isNotEmpty;
 
   static void validate() {
     if (!isConfigured) {

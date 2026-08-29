@@ -1,10 +1,5 @@
 include: package:flutter_lints/flutter.yaml
 
-analyzer:
-  errors:
-    info: ignore
-    warning: ignore
-
 linter:
   rules:
     sort_constructors_first: false
