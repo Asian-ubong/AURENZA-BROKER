@@ -1,74 +1,74 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
-import 'core/theme/orenza_theme.dart';
-import 'core/widgets/system_states.dart';
+import 'core/backend/supabase_client.dart';
+import 'core/brand/aurenza_wordmark.dart';
+import 'core/theme/aurenza_colors.dart';
+import 'core/theme/aurenza_theme.dart';
+import 'core/widgets/app_error.dart';
+import 'core/widgets/app_loading.dart';
 import 'features/dashboard/dashboard_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  SupabaseConfig.logStatus();
+  bool backendReady = false;
 
-  if (SupabaseConfig.isConfigured) {
-    await Supabase.initialize(
-      url: SupabaseConfig.url,
-      publishableKey: SupabaseConfig.publishableKey,
-    );
+  try {
+    backendReady = await AurenzaSupabase.initialize();
+  } catch (error) {
+    debugPrint('Supabase initialization failed: $error');
   }
 
-  runApp(const AurenzaApp());
+  runApp(
+    AurenzaApp(
+      backendReady: backendReady,
+    ),
+  );
 }
 
 class AurenzaApp extends StatelessWidget {
-  const AurenzaApp({super.key});
+  final bool backendReady;
+
+  const AurenzaApp({
+    super.key,
+    required this.backendReady,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'AURENZA Broker',
       debugShowCheckedModeBanner: false,
-      theme: OrenzaTheme.light(),
-      home: const BrokerShell(),
+      theme: AurenzaTheme.light(),
+      home: backendReady
+          ? const BrokerShell()
+          : const BackendUnavailableScreen(),
     );
   }
 }
 
-class BrokerDestination {
-  final String title;
-  final IconData icon;
+class BackendUnavailableScreen extends StatelessWidget {
+  const BackendUnavailableScreen({super.key});
 
-  const BrokerDestination(this.title, this.icon);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Center(
+          child: AppError(
+            message:
+                'AURENZA could not connect to its backend.\n\n'
+                'Configure Supabase and restart the application.',
+            onRetry: () {
+              main();
+            },
+          ),
+        ),
+      ),
+    );
+  }
 }
-
-const destinations = [
-  BrokerDestination('Dashboard', Icons.dashboard_outlined),
-  BrokerDestination(
-    'Wallet',
-    Icons.account_balance_wallet_outlined,
-  ),
-  BrokerDestination('Markets', Icons.show_chart_outlined),
-  BrokerDestination('Trading', Icons.swap_vert_rounded),
-  BrokerDestination(
-    'Trade History',
-    Icons.receipt_long_outlined,
-  ),
-  BrokerDestination(
-    'Trending AI',
-    Icons.auto_awesome_outlined,
-  ),
-  BrokerDestination('Security', Icons.security_outlined),
-  BrokerDestination(
-    'Connected Brokers',
-    Icons.link_outlined,
-  ),
-  BrokerDestination(
-    'Support',
-    Icons.support_agent_outlined,
-  ),
-  BrokerDestination('Settings', Icons.settings_outlined),
-];
 
 class BrokerShell extends StatefulWidget {
   const BrokerShell({super.key});
@@ -80,22 +80,53 @@ class BrokerShell extends StatefulWidget {
 class _BrokerShellState extends State<BrokerShell> {
   int selectedIndex = 0;
 
+  final titles = const [
+    'Dashboard',
+    'Wallet',
+    'Sandbox',
+    'Markets',
+    'Trading',
+    'Trade History',
+    'Trending AI',
+    'Security',
+    'Connected Brokers',
+    'Support',
+    'Settings',
+  ];
+
+  final icons = const [
+    Icons.dashboard_outlined,
+    Icons.account_balance_wallet_outlined,
+    Icons.shield_outlined,
+    Icons.show_chart_outlined,
+    Icons.swap_vert_rounded,
+    Icons.receipt_long_outlined,
+    Icons.auto_awesome_outlined,
+    Icons.security_outlined,
+    Icons.link_outlined,
+    Icons.support_agent_outlined,
+    Icons.settings_outlined,
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          if (constraints.maxWidth >= 900) {
+          if (constraints.maxWidth >= 1100) {
             return Row(
               children: [
                 _DesktopSidebar(
+                  titles: titles,
+                  icons: icons,
                   selectedIndex: selectedIndex,
                   onSelected: (index) {
                     setState(() => selectedIndex = index);
                   },
                 ),
                 Expanded(
-                  child: _Content(
+                  child: _Page(
+                    title: titles[selectedIndex],
                     index: selectedIndex,
                   ),
                 ),
@@ -103,7 +134,29 @@ class _BrokerShellState extends State<BrokerShell> {
             );
           }
 
-          return _MobileShell(
+          if (constraints.maxWidth >= 700) {
+            return Row(
+              children: [
+                _TabletNavigation(
+                  icons: icons,
+                  selectedIndex: selectedIndex,
+                  onSelected: (index) {
+                    setState(() => selectedIndex = index);
+                  },
+                ),
+                Expanded(
+                  child: _Page(
+                    title: titles[selectedIndex],
+                    index: selectedIndex,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return _MobileLayout(
+            titles: titles,
+            icons: icons,
             selectedIndex: selectedIndex,
             onSelected: (index) {
               setState(() => selectedIndex = index);
@@ -116,10 +169,14 @@ class _BrokerShellState extends State<BrokerShell> {
 }
 
 class _DesktopSidebar extends StatelessWidget {
+  final List<String> titles;
+  final List<IconData> icons;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
   const _DesktopSidebar({
+    required this.titles,
+    required this.icons,
     required this.selectedIndex,
     required this.onSelected,
   });
@@ -127,43 +184,29 @@ class _DesktopSidebar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 250,
-      color: OrenzaColors.forest,
+      width: 260,
+      color: AurenzaColors.forest,
       child: SafeArea(
         child: Column(
           children: [
             const Padding(
-              padding: EdgeInsets.fromLTRB(22, 25, 22, 30),
+              padding: EdgeInsets.all(24),
               child: Row(
                 children: [
                   Icon(
                     Icons.diamond_outlined,
-                    color: OrenzaColors.gold,
-                    size: 27,
+                    color: AurenzaColors.gold,
+                    size: 28,
                   ),
                   SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'AURENZA',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 1.2,
-                        ),
-                      ),
-                      Text(
-                        'BROKER',
-                        style: TextStyle(
-                          color: OrenzaColors.gold,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 2,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'AURENZA',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 20,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ],
               ),
@@ -171,65 +214,57 @@ class _DesktopSidebar extends StatelessWidget {
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: destinations.length,
-                itemBuilder: (context, index) {
-                  final selected = selectedIndex == index;
+                itemCount: titles.length,
+                itemBuilder: (_, index) {
+                  final selected = index == selectedIndex;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 4),
-                    child: Material(
-                      color: selected
-                          ? Colors.white.withValues(alpha: .11)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      child: ListTile(
-                        dense: true,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        leading: Icon(
-                          destinations[index].icon,
-                          color: selected
-                              ? OrenzaColors.gold
-                              : Colors.white60,
-                          size: 20,
-                        ),
-                        title: Text(
-                          destinations[index].title,
-                          style: TextStyle(
-                            color: selected
-                                ? Colors.white
-                                : Colors.white70,
-                            fontSize: 12.5,
-                            fontWeight: selected
-                                ? FontWeight.w800
-                                : FontWeight.w500,
-                          ),
-                        ),
-                        onTap: () => onSelected(index),
+                    child: ListTile(
+                      selected: selected,
+                      selectedTileColor:
+                          Colors.white.withValues(alpha: .12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
                       ),
+                      leading: Icon(
+                        icons[index],
+                        color: selected
+                            ? AurenzaColors.gold
+                            : Colors.white70,
+                      ),
+                      title: Text(
+                        titles[index],
+                        style: TextStyle(
+                          color: selected
+                              ? Colors.white
+                              : Colors.white70,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w500,
+                        ),
+                      ),
+                      onTap: () => onSelected(index),
                     ),
                   );
                 },
               ),
             ),
             const Padding(
-              padding: EdgeInsets.all(18),
+              padding: EdgeInsets.all(20),
               child: Row(
                 children: [
                   Icon(
                     Icons.shield_outlined,
-                    color: OrenzaColors.gold,
-                    size: 17,
+                    color: AurenzaColors.gold,
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'SECURE MODE',
+                    'SANDBOX MODE',
                     style: TextStyle(
                       color: Colors.white70,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
                     ),
                   ),
                 ],
@@ -242,83 +277,88 @@ class _DesktopSidebar extends StatelessWidget {
   }
 }
 
-class _MobileShell extends StatelessWidget {
+class _TabletNavigation extends StatelessWidget {
+  final List<IconData> icons;
   final int selectedIndex;
   final ValueChanged<int> onSelected;
 
-  const _MobileShell({
+  const _TabletNavigation({
+    required this.icons,
     required this.selectedIndex,
     required this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    const mobileIndexes = [0, 1, 2, 3];
+    return NavigationRail(
+      selectedIndex: selectedIndex,
+      onDestinationSelected: onSelected,
+      backgroundColor: AurenzaColors.forest,
+      indicatorColor: AurenzaColors.gold.withValues(alpha: .2),
+      selectedIconTheme: const IconThemeData(
+        color: AurenzaColors.gold,
+      ),
+      unselectedIconTheme: const IconThemeData(
+        color: Colors.white70,
+      ),
+      destinations: [
+        for (final icon in icons)
+          NavigationRailDestination(
+            icon: Icon(icon),
+            selectedIcon: Icon(icon),
+            label: const SizedBox.shrink(),
+          ),
+      ],
+    );
+  }
+}
 
-    final currentIsPrimary =
-        mobileIndexes.contains(selectedIndex);
+class _MobileLayout extends StatelessWidget {
+  final List<String> titles;
+  final List<IconData> icons;
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
 
-    final navIndex = currentIsPrimary
-        ? mobileIndexes.indexOf(selectedIndex)
-        : 4;
+  const _MobileLayout({
+    required this.titles,
+    required this.icons,
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = selectedIndex > 3 ? 0 : selectedIndex;
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(
-              Icons.diamond_outlined,
-              color: OrenzaColors.gold,
-              size: 22,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              destinations[selectedIndex].title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-              ),
-            ),
-          ],
-        ),
-        actions: const [
-          Padding(
-            padding: EdgeInsets.only(right: 14),
-            child: BackendStatusBadge(
-              configured: SupabaseConfig.isConfigured,
-              online: false,
-            ),
+        title: const AurenzaWordmark(compact: true),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.notifications_none),
           ),
         ],
       ),
-      body: _Content(index: selectedIndex),
+      body: _Page(
+        title: titles[selectedIndex],
+        index: selectedIndex,
+      ),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: navIndex,
-        onDestinationSelected: (value) {
-          if (value == 4) {
-            _showMore(context);
-          } else {
-            onSelected(mobileIndexes[value]);
-          }
-        },
+        selectedIndex: primary,
+        onDestinationSelected: onSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(
-              Icons.account_balance_wallet_outlined,
-            ),
+            icon: Icon(Icons.account_balance_wallet_outlined),
             label: 'Wallet',
           ),
           NavigationDestination(
             icon: Icon(Icons.show_chart_outlined),
             label: 'Markets',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_vert_rounded),
-            label: 'Trade',
           ),
           NavigationDestination(
             icon: Icon(Icons.menu),
@@ -328,58 +368,99 @@ class _MobileShell extends StatelessWidget {
       ),
     );
   }
-
-  void _showMore(BuildContext context) {
-    showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return SafeArea(
-          child: ListView(
-            shrinkWrap: true,
-            children: [
-              for (var i = 4; i < destinations.length; i++)
-                ListTile(
-                  leading: Icon(destinations[i].icon),
-                  title: Text(destinations[i].title),
-                  onTap: () {
-                    Navigator.pop(context);
-                    onSelected(i);
-                  },
-                ),
-            ],
-          ),
-        );
-      },
-    );
-  }
 }
 
-class _Content extends StatelessWidget {
+class _Page extends StatelessWidget {
+  final String title;
   final int index;
 
-  const _Content({
+  const _Page({
+    required this.title,
     required this.index,
   });
 
   @override
   Widget build(BuildContext context) {
     if (index == 0) {
-      return const DashboardScreen();
+      return Column(
+        children: [
+          if (MediaQuery.sizeOf(context).width >= 700)
+            _Header(title: title),
+          const Expanded(
+            child: DashboardScreen(),
+          ),
+        ],
+      );
     }
 
-    final destination = destinations[index];
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: AurenzaEmptyState(
-          icon: destination.icon,
-          title: '${destination.title} module',
-          message:
-              'The design shell is ready. This module will receive '
-              'its data from the AURENZA backend in the next phase.',
+    return Column(
+      children: [
+        if (MediaQuery.sizeOf(context).width >= 700)
+          _Header(title: title),
+        Expanded(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.construction_outlined,
+                  size: 48,
+                  color: AurenzaColors.gold,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Module foundation ready for backend implementation.',
+                ),
+              ],
+            ),
+          ),
         ),
+      ],
+    );
+  }
+}
+
+class _Header extends StatelessWidget {
+  final String title;
+
+  const _Header({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 28,
+        vertical: 20,
+      ),
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: AurenzaColors.border,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const Spacer(),
+          const Icon(Icons.notifications_none),
+          const SizedBox(width: 18),
+          CircleAvatar(
+            backgroundColor: AurenzaColors.forest,
+            child: const Icon(
+              Icons.person_outline,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
     );
   }
