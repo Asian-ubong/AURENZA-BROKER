@@ -8,13 +8,22 @@ class SupabaseConfig {
     defaultValue: '',
   );
 
-  static const publishableKey = String.fromEnvironment(
+  static const anonKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
   );
 
   static bool get isConfigured =>
-      url.trim().isNotEmpty && publishableKey.trim().isNotEmpty;
+      url.trim().isNotEmpty && anonKey.trim().isNotEmpty;
+
+  static void validate() {
+    if (!isConfigured) {
+      debugPrint(
+        'AURENZA: Supabase is not configured. '
+        'Backend-dependent features remain unavailable.',
+      );
+    }
+  }
 
   static void logStatus() {
     if (isConfigured) {
