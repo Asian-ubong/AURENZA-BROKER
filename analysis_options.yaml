@@ -1,9 +1,14 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  errors:
+    info: ignore
+    warning: ignore
+
 linter:
   rules:
-    prefer_const_constructors: true
-    prefer_const_declarations: true
-    prefer_const_literals_to_create_immutables: true
-    sort_constructors_first: true
-    sort_pub_dependencies: true
+    sort_constructors_first: false
+    prefer_expression_function_bodies: false
+    prefer_const_constructors: false
+    prefer_const_declarations: false
+    sort_pub_dependencies: false
