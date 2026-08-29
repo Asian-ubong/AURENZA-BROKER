@@ -1,20 +1,28 @@
 import 'package:flutter/foundation.dart';
 
 class SupabaseConfig {
-  static const url = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
+  SupabaseConfig._();
 
-  static const anonKey = String.fromEnvironment(
+  static const url = String.fromEnvironment(
+    'SUPABASE_URL',
+    defaultValue: '',
+  );
+
+  static const publishableKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',
     defaultValue: '',
   );
 
-  static bool get isConfigured => url.isNotEmpty && anonKey.isNotEmpty;
+  static bool get isConfigured =>
+      url.trim().isNotEmpty && publishableKey.trim().isNotEmpty;
 
-  static void validate() {
-    if (!isConfigured) {
+  static void logStatus() {
+    if (isConfigured) {
+      debugPrint('AURENZA: Supabase configuration detected.');
+    } else {
       debugPrint(
-        'SUPABASE NOT CONFIGURED: '
-        'provide SUPABASE_URL and SUPABASE_ANON_KEY at build time.',
+        'AURENZA: Supabase is not configured. '
+        'The application will remain in backend-unavailable mode.',
       );
     }
   }

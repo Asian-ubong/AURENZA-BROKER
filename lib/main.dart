@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'config/supabase_config.dart';
 import 'core/theme/orenza_theme.dart';
+import 'core/widgets/system_states.dart';
 import 'features/dashboard/dashboard_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  SupabaseConfig.logStatus();
+
+  if (SupabaseConfig.isConfigured) {
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      publishableKey: SupabaseConfig.publishableKey,
+    );
+  }
+
   runApp(const AurenzaApp());
 }
 
@@ -22,6 +35,41 @@ class AurenzaApp extends StatelessWidget {
   }
 }
 
+class BrokerDestination {
+  final String title;
+  final IconData icon;
+
+  const BrokerDestination(this.title, this.icon);
+}
+
+const destinations = [
+  BrokerDestination('Dashboard', Icons.dashboard_outlined),
+  BrokerDestination(
+    'Wallet',
+    Icons.account_balance_wallet_outlined,
+  ),
+  BrokerDestination('Markets', Icons.show_chart_outlined),
+  BrokerDestination('Trading', Icons.swap_vert_rounded),
+  BrokerDestination(
+    'Trade History',
+    Icons.receipt_long_outlined,
+  ),
+  BrokerDestination(
+    'Trending AI',
+    Icons.auto_awesome_outlined,
+  ),
+  BrokerDestination('Security', Icons.security_outlined),
+  BrokerDestination(
+    'Connected Brokers',
+    Icons.link_outlined,
+  ),
+  BrokerDestination(
+    'Support',
+    Icons.support_agent_outlined,
+  ),
+  BrokerDestination('Settings', Icons.settings_outlined),
+];
+
 class BrokerShell extends StatefulWidget {
   const BrokerShell({super.key});
 
@@ -32,28 +80,12 @@ class BrokerShell extends StatefulWidget {
 class _BrokerShellState extends State<BrokerShell> {
   int selectedIndex = 0;
 
-  final List<String> titles = [
-    'Dashboard',
-    'Wallet',
-    'Sandbox',
-    'Markets',
-    'Trading',
-    'Trade History',
-    'Trending AI',
-    'Security',
-    'Connected Brokers',
-    'Support',
-    'Settings',
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
-          final desktop = constraints.maxWidth >= 900;
-
-          if (desktop) {
+          if (constraints.maxWidth >= 900) {
             return Row(
               children: [
                 _DesktopSidebar(
@@ -61,21 +93,18 @@ class _BrokerShellState extends State<BrokerShell> {
                   onSelected: (index) {
                     setState(() => selectedIndex = index);
                   },
-                  titles: titles,
                 ),
                 Expanded(
                   child: _Content(
-                    title: titles[selectedIndex],
-                    selectedIndex: selectedIndex,
+                    index: selectedIndex,
                   ),
                 ),
               ],
             );
           }
 
-          return _MobileLayout(
+          return _MobileShell(
             selectedIndex: selectedIndex,
-            titles: titles,
             onSelected: (index) {
               setState(() => selectedIndex = index);
             },
@@ -89,38 +118,22 @@ class _BrokerShellState extends State<BrokerShell> {
 class _DesktopSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onSelected;
-  final List<String> titles;
 
   const _DesktopSidebar({
     required this.selectedIndex,
     required this.onSelected,
-    required this.titles,
   });
-
-  static const icons = [
-    Icons.dashboard_outlined,
-    Icons.account_balance_wallet_outlined,
-    Icons.shield_outlined,
-    Icons.show_chart_outlined,
-    Icons.swap_vert_rounded,
-    Icons.receipt_long_outlined,
-    Icons.auto_awesome_outlined,
-    Icons.security_outlined,
-    Icons.link_outlined,
-    Icons.support_agent_outlined,
-    Icons.settings_outlined,
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 250,
-      color: OrenzaColors.forestGreen,
+      color: OrenzaColors.forest,
       child: SafeArea(
         child: Column(
           children: [
             const Padding(
-              padding: EdgeInsets.fromLTRB(22, 24, 22, 30),
+              padding: EdgeInsets.fromLTRB(22, 25, 22, 30),
               child: Row(
                 children: [
                   Icon(
@@ -146,7 +159,7 @@ class _DesktopSidebar extends StatelessWidget {
                         style: TextStyle(
                           color: OrenzaColors.gold,
                           fontSize: 9,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                           letterSpacing: 2,
                         ),
                       ),
@@ -155,19 +168,18 @@ class _DesktopSidebar extends StatelessWidget {
                 ],
               ),
             ),
-
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
-                itemCount: titles.length,
+                itemCount: destinations.length,
                 itemBuilder: (context, index) {
-                  final selected = index == selectedIndex;
+                  final selected = selectedIndex == index;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Material(
                       color: selected
-                          ? Colors.white.withValues(alpha: .12)
+                          ? Colors.white.withValues(alpha: .11)
                           : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                       child: ListTile(
@@ -176,18 +188,22 @@ class _DesktopSidebar extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         leading: Icon(
-                          icons[index],
-                          color: selected ? OrenzaColors.gold : Colors.white70,
+                          destinations[index].icon,
+                          color: selected
+                              ? OrenzaColors.gold
+                              : Colors.white60,
                           size: 20,
                         ),
                         title: Text(
-                          titles[index],
+                          destinations[index].title,
                           style: TextStyle(
-                            color: selected ? Colors.white : Colors.white70,
+                            color: selected
+                                ? Colors.white
+                                : Colors.white70,
+                            fontSize: 12.5,
                             fontWeight: selected
-                                ? FontWeight.w700
+                                ? FontWeight.w800
                                 : FontWeight.w500,
-                            fontSize: 13,
                           ),
                         ),
                         onTap: () => onSelected(index),
@@ -197,7 +213,6 @@ class _DesktopSidebar extends StatelessWidget {
                 },
               ),
             ),
-
             const Padding(
               padding: EdgeInsets.all(18),
               child: Row(
@@ -208,15 +223,13 @@ class _DesktopSidebar extends StatelessWidget {
                     size: 17,
                   ),
                   SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'SANDBOX MODE',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
-                      ),
+                  Text(
+                    'SECURE MODE',
+                    style: TextStyle(
+                      color: Colors.white70,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1,
                     ),
                   ),
                 ],
@@ -229,164 +242,64 @@ class _DesktopSidebar extends StatelessWidget {
   }
 }
 
-class _Content extends StatelessWidget {
-  final String title;
+class _MobileShell extends StatelessWidget {
   final int selectedIndex;
-
-  const _Content({required this.title, required this.selectedIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    if (selectedIndex == 0) {
-      return Column(
-        children: [
-          _TopBar(title: title),
-          const Expanded(child: DashboardScreen()),
-        ],
-      );
-    }
-
-    return Column(
-      children: [
-        _TopBar(title: title),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.construction_outlined,
-                  size: 46,
-                  color: OrenzaColors.gold,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Module foundation ready for implementation.',
-                  style: TextStyle(color: OrenzaColors.slate),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TopBar extends StatelessWidget {
-  final String title;
-
-  const _TopBar({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 76,
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      decoration: const BoxDecoration(
-        color: OrenzaColors.ivory,
-        border: Border(bottom: BorderSide(color: OrenzaColors.border)),
-      ),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(
-              color: OrenzaColors.successBackground,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.circle, size: 8, color: OrenzaColors.emerald),
-                SizedBox(width: 7),
-                Text(
-                  'Sandbox Active',
-                  style: TextStyle(
-                    color: OrenzaColors.forestGreen,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 14),
-          const CircleAvatar(
-            backgroundColor: OrenzaColors.forestGreen,
-            child: Icon(Icons.person_outline, color: Colors.white),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MobileLayout extends StatelessWidget {
-  final int selectedIndex;
-  final List<String> titles;
   final ValueChanged<int> onSelected;
 
-  const _MobileLayout({
+  const _MobileShell({
     required this.selectedIndex,
-    required this.titles,
     required this.onSelected,
   });
 
   @override
   Widget build(BuildContext context) {
+    const mobileIndexes = [0, 1, 2, 3];
+
+    final currentIsPrimary =
+        mobileIndexes.contains(selectedIndex);
+
+    final navIndex = currentIsPrimary
+        ? mobileIndexes.indexOf(selectedIndex)
+        : 4;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'AURENZA',
-          style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1),
-        ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 14),
-            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
-            decoration: BoxDecoration(
-              color: OrenzaColors.forestGreen,
-              borderRadius: BorderRadius.circular(14),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.diamond_outlined,
+              color: OrenzaColors.gold,
+              size: 22,
             ),
-            child: const Text(
-              'SANDBOX',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
+            const SizedBox(width: 8),
+            Text(
+              destinations[selectedIndex].title,
+              style: const TextStyle(
+                fontWeight: FontWeight.w900,
               ),
+            ),
+          ],
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 14),
+            child: BackendStatusBadge(
+              configured: SupabaseConfig.isConfigured,
+              online: false,
             ),
           ),
         ],
       ),
-      body: selectedIndex == 0
-          ? const DashboardScreen()
-          : Center(
-              child: Text(
-                titles[selectedIndex],
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
+      body: _Content(index: selectedIndex),
       bottomNavigationBar: NavigationBar(
-        selectedIndex: selectedIndex > 4 ? 0 : selectedIndex,
-        onDestinationSelected: onSelected,
-        indicatorColor: OrenzaColors.gold.withValues(alpha: .25),
+        selectedIndex: navIndex,
+        onDestinationSelected: (value) {
+          if (value == 4) {
+            _showMore(context);
+          } else {
+            onSelected(mobileIndexes[value]);
+          }
+        },
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
@@ -394,16 +307,79 @@ class _MobileLayout extends StatelessWidget {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.account_balance_wallet_outlined),
+            icon: Icon(
+              Icons.account_balance_wallet_outlined,
+            ),
             label: 'Wallet',
           ),
           NavigationDestination(
             icon: Icon(Icons.show_chart_outlined),
             label: 'Markets',
           ),
-          NavigationDestination(icon: Icon(Icons.swap_vert), label: 'Trade'),
-          NavigationDestination(icon: Icon(Icons.menu), label: 'More'),
+          NavigationDestination(
+            icon: Icon(Icons.swap_vert_rounded),
+            label: 'Trade',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu),
+            label: 'More',
+          ),
         ],
+      ),
+    );
+  }
+
+  void _showMore(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return SafeArea(
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (var i = 4; i < destinations.length; i++)
+                ListTile(
+                  leading: Icon(destinations[i].icon),
+                  title: Text(destinations[i].title),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onSelected(i);
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Content extends StatelessWidget {
+  final int index;
+
+  const _Content({
+    required this.index,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (index == 0) {
+      return const DashboardScreen();
+    }
+
+    final destination = destinations[index];
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: AurenzaEmptyState(
+          icon: destination.icon,
+          title: '${destination.title} module',
+          message:
+              'The design shell is ready. This module will receive '
+              'its data from the AURENZA backend in the next phase.',
+        ),
       ),
     );
   }
