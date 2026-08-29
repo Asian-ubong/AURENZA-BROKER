@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'config/supabase_config.dart';
 import 'core/backend/supabase_client.dart';
 import 'core/brand/aurenza_wordmark.dart';
 import 'core/theme/aurenza_colors.dart';
 import 'core/theme/aurenza_theme.dart';
 import 'core/widgets/app_error.dart';
-import 'core/widgets/app_loading.dart';
 import 'features/dashboard/dashboard_screen.dart';
 
 Future<void> main() async {
