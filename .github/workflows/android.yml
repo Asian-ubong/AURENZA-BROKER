@@ -1,4 +1,4 @@
-name: AURENZA BROKER Android Release
+name: AURENZA BROKER - Build Signed Android APK
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-android:
-    name: Build Signed AURENZA BROKER APK
+    name: Build AURENZA Android APK
     runs-on: ubuntu-latest
 
     env:
@@ -23,11 +23,12 @@ jobs:
       - name: Checkout AURENZA
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
+          cache: gradle
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -35,16 +36,18 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Show Flutter version
-        run: flutter --version
+      - name: Show tool versions
+        run: |
+          flutter --version
+          java -version
 
-      - name: Generate Android platform files
+      - name: Generate Android platform files when missing
         run: |
           if [ ! -d android ]; then
             flutter create \
               --platforms=android \
               --project-name=aurenza_broker \
-              --org=com.aurenza \
+              --org=com.example \
               .
           fi
 
@@ -60,154 +63,78 @@ jobs:
       - name: Run Flutter tests
         run: flutter test
 
-      - name: Prepare Android signing
+      - name: Prepare signing keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          set -euo pipefail
+          test -n "$KEYSTORE_BASE64"
+          test -n "$KEYSTORE_PASSWORD"
+          test -n "$KEY_PASSWORD"
+          test -n "$KEY_ALIAS"
 
-          test -n "$KEYSTORE_BASE64" || {
-            echo "ERROR: KEYSTORE_BASE64 secret is missing."
-            exit 1
-          }
+          mkdir -p android/app
 
-          test -n "$KEYSTORE_PASSWORD" || {
-            echo "ERROR: KEYSTORE_PASSWORD secret is missing."
-            exit 1
-          }
-
-          test -n "$KEY_PASSWORD" || {
-            echo "ERROR: KEY_PASSWORD secret is missing."
-            exit 1
-          }
-
-          test -n "$KEY_ALIAS" || {
-            echo "ERROR: KEY_ALIAS secret is missing."
-            exit 1
-          }
-
-          printf '%s' "$KEYSTORE_BASE64" | base64 --decode \
+          printf '%s' "$KEYSTORE_BASE64" \
+            | base64 --decode \
             > android/app/aurenza-upload-key.jks
 
           test -s android/app/aurenza-upload-key.jks
 
-          cat > android/key.properties <<EOF
-          storePassword=$KEYSTORE_PASSWORD
-          keyPassword=$KEY_PASSWORD
-          keyAlias=$KEY_ALIAS
-          storeFile=aurenza-upload-key.jks
-          EOF
-
-      - name: Configure release signing
+      - name: Build release APK
         run: |
-          python3 - <<'PY'
-          from pathlib import Path
+          flutter clean
+          flutter pub get
 
-          path = Path("android/app/build.gradle.kts")
-          text = path.read_text()
-
-          header = """import java.io.FileInputStream
-          import java.util.Properties
-
-          val keystoreProperties = Properties()
-          val keystorePropertiesFile = rootProject.file("key.properties")
-
-          if (keystorePropertiesFile.exists()) {
-              keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-          }
-
-          """
-
-          if "val keystoreProperties = Properties()" not in text:
-              text = header + text
-
-          signing_config = """
-              signingConfigs {
-                  create("release") {
-                      keyAlias = keystoreProperties["keyAlias"] as String?
-                      keyPassword = keystoreProperties["keyPassword"] as String?
-                      storeFile = keystoreProperties["storeFile"]?.let { file(it) }
-                      storePassword = keystoreProperties["storePassword"] as String?
-                  }
-              }
-          """
-
-          if 'create("release")' not in text:
-              marker = "    buildTypes {"
-
-              if marker not in text:
-                  raise SystemExit(
-                      "Could not locate buildTypes in android/app/build.gradle.kts"
-                  )
-
-              text = text.replace(
-                  marker,
-                  signing_config + "\n" + marker,
-                  1
-              )
-
-          if 'signingConfig = signingConfigs.getByName("release")' not in text:
-              marker = "        release {"
-
-              if marker not in text:
-                  raise SystemExit(
-                      "Could not locate release build type"
-                  )
-
-              text = text.replace(
-                  marker,
-                  marker + '\n            signingConfig = signingConfigs.getByName("release")',
-                  1
-              )
-
-          path.write_text(text)
-          PY
-
-          echo "Signing configuration:"
-          grep -n -E \
-            "keystoreProperties|signingConfigs|signingConfig" \
-            android/app/build.gradle.kts
-
-      - name: Build signed release APK
-        run: |
           flutter build apk \
             --release \
-            --build-name=1.0.0 \
             --build-number=${{ github.run_number }}
 
-      - name: Verify release APK
+      - name: Sign release APK
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           APK="build/app/outputs/flutter-apk/app-release.apk"
 
           test -f "$APK"
 
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" \
+            -type f \
+            -name apksigner \
+            | sort -V \
+            | tail -n 1)
+
+          test -x "$APKSIGNER"
+
+          "$APKSIGNER" sign \
+            --ks android/app/aurenza-upload-key.jks \
+            --ks-key-alias "$SIGNING_KEY_ALIAS" \
+            --ks-pass "pass:$SIGNING_STORE_PASSWORD" \
+            --key-pass "pass:$SIGNING_KEY_PASSWORD" \
+            --out "$APK.signed" \
+            "$APK"
+
+          mv "$APK.signed" "$APK"
+
+          "$APKSIGNER" verify --verbose "$APK"
+
+      - name: Prepare release artifacts
+        run: |
           mkdir -p release
 
           cp \
-            "$APK" \
+            build/app/outputs/flutter-apk/app-release.apk \
             release/AURENZA-BROKER-release.apk
-
-          ls -lh release/AURENZA-BROKER-release.apk
-
-      - name: Verify APK signature
-        run: |
-          APKSIGNER="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -n 1)/apksigner"
-
-          "$APKSIGNER" verify \
-            --verbose \
-            release/AURENZA-BROKER-release.apk
-
-      - name: Generate SHA256
-        run: |
-          cd release
 
           sha256sum \
-            AURENZA-BROKER-release.apk \
-            > AURENZA-BROKER-release.apk.sha256
+            release/AURENZA-BROKER-release.apk \
+            > release/AURENZA-BROKER-release.apk.sha256
 
-          cat AURENZA-BROKER-release.apk.sha256
+          ls -lh release/
+          cat release/AURENZA-BROKER-release.apk.sha256
 
-      - name: Upload AURENZA BROKER release APK
+      - name: Upload signed release APK
         uses: actions/upload-artifact@v4
         with:
           name: AURENZA-BROKER-release
@@ -226,5 +153,5 @@ jobs:
       - name: Cleanup signing files
         if: always()
         run: |
-          rm -f android/key.properties
           rm -f android/app/aurenza-upload-key.jks
+          rm -f android/key.properties
