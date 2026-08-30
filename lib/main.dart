@@ -18,20 +18,13 @@ Future<void> main() async {
     debugPrint('Supabase initialization failed: $error');
   }
 
-  runApp(
-    AurenzaApp(
-      backendReady: backendReady,
-    ),
-  );
+  runApp(AurenzaApp(backendReady: backendReady));
 }
 
 class AurenzaApp extends StatelessWidget {
   final bool backendReady;
 
-  const AurenzaApp({
-    super.key,
-    required this.backendReady,
-  });
+  const AurenzaApp({super.key, required this.backendReady});
 
   @override
   Widget build(BuildContext context) {
@@ -220,23 +213,18 @@ class _DesktopSidebar extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: ListTile(
                       selected: selected,
-                      selectedTileColor:
-                          Colors.white.withValues(alpha: .12),
+                      selectedTileColor: Colors.white.withValues(alpha: .12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14),
                       ),
                       leading: Icon(
                         icons[index],
-                        color: selected
-                            ? AurenzaColors.gold
-                            : Colors.white70,
+                        color: selected ? AurenzaColors.gold : Colors.white70,
                       ),
                       title: Text(
                         titles[index],
                         style: TextStyle(
-                          color: selected
-                              ? Colors.white
-                              : Colors.white70,
+                          color: selected ? Colors.white : Colors.white70,
                           fontWeight: selected
                               ? FontWeight.w700
                               : FontWeight.w500,
@@ -252,10 +240,7 @@ class _DesktopSidebar extends StatelessWidget {
               padding: EdgeInsets.all(20),
               child: Row(
                 children: [
-                  Icon(
-                    Icons.shield_outlined,
-                    color: AurenzaColors.gold,
-                  ),
+                  Icon(Icons.shield_outlined, color: AurenzaColors.gold),
                   SizedBox(width: 8),
                   Text(
                     'SANDBOX MODE',
@@ -293,12 +278,8 @@ class _TabletNavigation extends StatelessWidget {
       onDestinationSelected: onSelected,
       backgroundColor: AurenzaColors.forest,
       indicatorColor: AurenzaColors.gold.withValues(alpha: .2),
-      selectedIconTheme: const IconThemeData(
-        color: AurenzaColors.gold,
-      ),
-      unselectedIconTheme: const IconThemeData(
-        color: Colors.white70,
-      ),
+      selectedIconTheme: const IconThemeData(color: AurenzaColors.gold),
+      unselectedIconTheme: const IconThemeData(color: Colors.white70),
       destinations: [
         for (final icon in icons)
           NavigationRailDestination(
@@ -338,10 +319,7 @@ class _MobileLayout extends StatelessWidget {
           ),
         ],
       ),
-      body: _Page(
-        title: titles[selectedIndex],
-        index: selectedIndex,
-      ),
+      body: _Page(title: titles[selectedIndex], index: selectedIndex),
       bottomNavigationBar: NavigationBar(
         selectedIndex: primary,
         onDestinationSelected: onSelected,
@@ -358,10 +336,7 @@ class _MobileLayout extends StatelessWidget {
             icon: Icon(Icons.show_chart_outlined),
             label: 'Markets',
           ),
-          NavigationDestination(
-            icon: Icon(Icons.menu),
-            label: 'More',
-          ),
+          NavigationDestination(icon: Icon(Icons.menu), label: 'More'),
         ],
       ),
     );
@@ -372,29 +347,22 @@ class _Page extends StatelessWidget {
   final String title;
   final int index;
 
-  const _Page({
-    required this.title,
-    required this.index,
-  });
+  const _Page({required this.title, required this.index});
 
   @override
   Widget build(BuildContext context) {
     if (index == 0) {
       return Column(
         children: [
-          if (MediaQuery.sizeOf(context).width >= 700)
-            _Header(title: title),
-          const Expanded(
-            child: DashboardScreen(),
-          ),
+          if (MediaQuery.sizeOf(context).width >= 700) _Header(title: title),
+          const Expanded(child: DashboardScreen()),
         ],
       );
     }
 
     return Column(
       children: [
-        if (MediaQuery.sizeOf(context).width >= 700)
-          _Header(title: title),
+        if (MediaQuery.sizeOf(context).width >= 700) _Header(title: title),
         Expanded(
           child: Center(
             child: Column(
@@ -406,10 +374,7 @@ class _Page extends StatelessWidget {
                   color: AurenzaColors.gold,
                 ),
                 const SizedBox(height: 16),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
+                Text(title, style: Theme.of(context).textTheme.titleLarge),
                 const SizedBox(height: 8),
                 const Text(
                   'Module foundation ready for backend implementation.',
@@ -431,32 +396,19 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 28,
-        vertical: 20,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 20),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: AurenzaColors.border,
-          ),
-        ),
+        border: Border(bottom: BorderSide(color: AurenzaColors.border)),
       ),
       child: Row(
         children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
+          Text(title, style: Theme.of(context).textTheme.titleLarge),
           const Spacer(),
           const Icon(Icons.notifications_none),
           const SizedBox(width: 18),
           CircleAvatar(
             backgroundColor: AurenzaColors.forest,
-            child: const Icon(
-              Icons.person_outline,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.person_outline, color: Colors.white),
           ),
         ],
       ),

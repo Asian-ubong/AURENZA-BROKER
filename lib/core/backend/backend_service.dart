@@ -45,7 +45,19 @@ class BackendService {
 
   SupabaseClient get client => Supabase.instance.client;
 
+  Future<void> bootstrapUser() async {
+    if (client.auth.currentSession == null) {
+      throw StateError('Authentication required.');
+    }
+
+    await client.rpc('bootstrap_aurenza_user');
+  }
+
   Future<BackendDashboard> getDashboard() async {
+    if (client.auth.currentSession == null) {
+      throw StateError('Authentication required.');
+    }
+
     final response = await client.rpc('get_broker_dashboard');
 
     if (response is Map<String, dynamic>) {
@@ -60,9 +72,7 @@ class BackendService {
       }
     }
 
-    throw StateError(
-      'Backend returned no dashboard data.',
-    );
+    throw StateError('Backend returned no dashboard data.');
   }
 
   Future<bool> checkBackend() async {
