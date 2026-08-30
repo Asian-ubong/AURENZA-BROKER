@@ -39,7 +39,6 @@ jobs:
         run: |
           flutter --version
           java -version
-          keytool -version
 
       - name: Generate Android platform files when missing
         run: |
