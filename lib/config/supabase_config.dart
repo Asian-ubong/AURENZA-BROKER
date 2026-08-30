@@ -3,10 +3,7 @@ import 'package:flutter/foundation.dart';
 class SupabaseConfig {
   SupabaseConfig._();
 
-  static const url = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: '',
-  );
+  static const url = String.fromEnvironment('SUPABASE_URL', defaultValue: '');
 
   static const publishableKey = String.fromEnvironment(
     'SUPABASE_ANON_KEY',

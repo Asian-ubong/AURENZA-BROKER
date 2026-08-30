@@ -5,10 +5,7 @@ import '../theme/orenza_theme.dart';
 class AurenzaLoading extends StatelessWidget {
   final String message;
 
-  const AurenzaLoading({
-    super.key,
-    this.message = 'Loading securely...',
-  });
+  const AurenzaLoading({super.key, this.message = 'Loading securely...'});
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +18,7 @@ class AurenzaLoading extends StatelessWidget {
             const SizedBox(
               width: 28,
               height: 28,
-              child: CircularProgressIndicator(
-                strokeWidth: 2.5,
-              ),
+              child: CircularProgressIndicator(strokeWidth: 2.5),
             ),
             const SizedBox(height: 16),
             Text(
@@ -61,27 +56,17 @@ class AurenzaEmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 48,
-              color: OrenzaColors.gold,
-            ),
+            Icon(icon, size: 48, color: OrenzaColors.gold),
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: OrenzaColors.slate,
-                height: 1.5,
-              ),
+              style: const TextStyle(color: OrenzaColors.slate, height: 1.5),
             ),
           ],
         ),
@@ -94,11 +79,7 @@ class AurenzaErrorState extends StatelessWidget {
   final String message;
   final VoidCallback? onRetry;
 
-  const AurenzaErrorState({
-    super.key,
-    required this.message,
-    this.onRetry,
-  });
+  const AurenzaErrorState({super.key, required this.message, this.onRetry});
 
   @override
   Widget build(BuildContext context) {
@@ -116,19 +97,13 @@ class AurenzaErrorState extends StatelessWidget {
             const SizedBox(height: 16),
             const Text(
               'Backend unavailable',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
             ),
             const SizedBox(height: 8),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: OrenzaColors.slate,
-                height: 1.5,
-              ),
+              style: const TextStyle(color: OrenzaColors.slate, height: 1.5),
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 20),
@@ -160,10 +135,7 @@ class BackendStatusBadge extends StatelessWidget {
     final active = configured && online;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
         color: active
             ? OrenzaColors.successBackground
@@ -177,9 +149,7 @@ class BackendStatusBadge extends StatelessWidget {
             width: 7,
             height: 7,
             decoration: BoxDecoration(
-              color: active
-                  ? OrenzaColors.success
-                  : OrenzaColors.warning,
+              color: active ? OrenzaColors.success : OrenzaColors.warning,
               shape: BoxShape.circle,
             ),
           ),
@@ -187,9 +157,7 @@ class BackendStatusBadge extends StatelessWidget {
           Text(
             active ? 'BACKEND ONLINE' : 'BACKEND PENDING',
             style: TextStyle(
-              color: active
-                  ? OrenzaColors.success
-                  : OrenzaColors.warning,
+              color: active ? OrenzaColors.success : OrenzaColors.warning,
               fontSize: 9,
               fontWeight: FontWeight.w900,
               letterSpacing: .8,

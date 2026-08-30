@@ -25,16 +25,10 @@ class AppError extends StatelessWidget {
               color: AurenzaColors.danger,
             ),
             const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-            ),
+            Text(message, textAlign: TextAlign.center),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
-              FilledButton(
-                onPressed: onRetry,
-                child: const Text('Retry'),
-              ),
+              FilledButton(onPressed: onRetry, child: const Text('Retry')),
             ],
           ],
         ),

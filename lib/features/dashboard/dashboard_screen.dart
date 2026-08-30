@@ -65,8 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         if (data == null) {
           return const AurenzaEmptyState(
             title: 'No dashboard data',
-            message:
-                'Your backend has not returned an account snapshot yet.',
+            message: 'Your backend has not returned an account snapshot yet.',
           );
         }
 
@@ -79,9 +78,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 class _DashboardContent extends StatelessWidget {
   final BackendDashboard data;
 
-  const _DashboardContent({
-    required this.data,
-  });
+  const _DashboardContent({required this.data});
 
   String money(double value) {
     final sign = value < 0 ? '-' : '';
@@ -171,8 +168,7 @@ class _DashboardContent extends StatelessWidget {
                 final columns = constraints.maxWidth >= 850 ? 4 : 2;
                 final gap = 12.0;
                 final width =
-                    (constraints.maxWidth - ((columns - 1) * gap)) /
-                        columns;
+                    (constraints.maxWidth - ((columns - 1) * gap)) / columns;
 
                 return Wrap(
                   spacing: gap,
@@ -233,9 +229,7 @@ class _DashboardContent extends StatelessWidget {
                         children: [
                           Text(
                             'Backend-controlled account',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w800,
-                            ),
+                            style: TextStyle(fontWeight: FontWeight.w800),
                           ),
                           SizedBox(height: 4),
                           Text(
@@ -248,10 +242,7 @@ class _DashboardContent extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Icon(
-                      Icons.lock_outline,
-                      color: OrenzaColors.success,
-                    ),
+                    const Icon(Icons.lock_outline, color: OrenzaColors.success),
                   ],
                 ),
               ),
@@ -267,10 +258,7 @@ class _HeroBalance extends StatelessWidget {
   final String value;
   final String currency;
 
-  const _HeroBalance({
-    required this.value,
-    required this.currency,
-  });
+  const _HeroBalance({required this.value, required this.currency});
 
   @override
   Widget build(BuildContext context) {
@@ -279,10 +267,7 @@ class _HeroBalance extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [
-            OrenzaColors.forest,
-            OrenzaColors.forestGreen,
-          ],
+          colors: [OrenzaColors.forest, OrenzaColors.forestGreen],
         ),
         borderRadius: BorderRadius.circular(22),
       ),
@@ -352,11 +337,7 @@ class _MetricCard extends StatelessWidget {
                   color: OrenzaColors.forestGreen,
                   borderRadius: BorderRadius.circular(11),
                 ),
-                child: Icon(
-                  icon,
-                  color: OrenzaColors.gold,
-                  size: 19,
-                ),
+                child: Icon(icon, color: OrenzaColors.gold, size: 19),
               ),
               const SizedBox(width: 10),
               Expanded(

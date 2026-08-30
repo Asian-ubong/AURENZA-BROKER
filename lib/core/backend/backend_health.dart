@@ -11,10 +11,7 @@ class BackendHealth extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await AurenzaSupabase.client
-          .from('profiles')
-          .select('id')
-          .limit(1);
+      await AurenzaSupabase.client.from('profiles').select('id').limit(1);
 
       available = true;
       message = 'Backend connected';

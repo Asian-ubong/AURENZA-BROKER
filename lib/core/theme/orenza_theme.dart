@@ -40,15 +40,16 @@ class OrenzaTheme {
   OrenzaTheme._();
 
   static ThemeData light() {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: OrenzaColors.forestGreen,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: OrenzaColors.forestGreen,
-      secondary: OrenzaColors.gold,
-      surface: OrenzaColors.white,
-      error: OrenzaColors.danger,
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: OrenzaColors.forestGreen,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: OrenzaColors.forestGreen,
+          secondary: OrenzaColors.gold,
+          surface: OrenzaColors.white,
+          error: OrenzaColors.danger,
+        );
 
     return ThemeData(
       useMaterial3: true,
@@ -102,10 +103,7 @@ class OrenzaTheme {
         backgroundColor: OrenzaColors.white,
         indicatorColor: OrenzaColors.softGold.withValues(alpha: .25),
         labelTextStyle: WidgetStateProperty.all(
-          const TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w700,
-          ),
+          const TextStyle(fontSize: 11, fontWeight: FontWeight.w700),
         ),
       ),
 
@@ -130,12 +128,8 @@ class OrenzaTheme {
           color: OrenzaColors.charcoal,
           fontWeight: FontWeight.w700,
         ),
-        bodyLarge: TextStyle(
-          color: OrenzaColors.charcoal,
-        ),
-        bodyMedium: TextStyle(
-          color: OrenzaColors.slate,
-        ),
+        bodyLarge: TextStyle(color: OrenzaColors.charcoal),
+        bodyMedium: TextStyle(color: OrenzaColors.slate),
       ),
     );
   }

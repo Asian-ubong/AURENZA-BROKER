@@ -23,10 +23,7 @@ class AppEmpty extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: AurenzaColors.muted),
             const SizedBox(height: 16),
-            Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Text(
               message,
