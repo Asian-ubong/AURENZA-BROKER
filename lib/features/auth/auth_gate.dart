@@ -64,7 +64,7 @@ class AuthGate extends StatelessWidget {
               );
             }
 
-            return const BrokerShell();
+            return const DashboardScreen();
           },
         );
       },
