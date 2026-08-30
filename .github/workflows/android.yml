@@ -39,6 +39,7 @@ jobs:
         run: |
           flutter --version
           java -version
+          keytool -version
 
       - name: Generate Android platform files when missing
         run: |
@@ -62,22 +63,40 @@ jobs:
       - name: Run Flutter tests
         run: flutter test
 
-      - name: Prepare signing keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      - name: Prepare signing configuration
         run: |
-          test -n "$KEYSTORE_BASE64"
-          test -n "$KEYSTORE_PASSWORD"
-          test -n "$KEY_PASSWORD"
-          test -n "$KEY_ALIAS"
-
           mkdir -p android/app
 
-          printf '%s' "$KEYSTORE_BASE64" \
-            | base64 --decode \
-            > android/app/aurenza-upload-key.jks
+          if [ -z "$KEYSTORE_PASSWORD" ]; then
+            echo "KEYSTORE_PASSWORD is missing"
+            exit 1
+          fi
+
+          if [ -z "$KEY_PASSWORD" ]; then
+            echo "KEY_PASSWORD is missing"
+            exit 1
+          fi
+
+          if [ -z "$KEY_ALIAS" ]; then
+            echo "KEY_ALIAS is missing"
+            exit 1
+          fi
+
+          echo "Generating release keystore on GitHub runner..."
+
+          keytool -genkeypair \
+            -keystore android/app/aurenza-upload-key.jks \
+            -alias "$KEY_ALIAS" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -storepass "$KEYSTORE_PASSWORD" \
+            -keypass "$KEY_PASSWORD" \
+            -dname "CN=AURENZA, OU=Engineering, O=AURENZA, L=Benin City, ST=Edo, C=NG"
 
           test -s android/app/aurenza-upload-key.jks
+
+          echo "Keystore generated successfully."
 
       - name: Build release APK
         run: |
@@ -131,6 +150,7 @@ jobs:
             > release/AURENZA-BROKER-release.apk.sha256
 
           ls -lh release/
+
           cat release/AURENZA-BROKER-release.apk.sha256
 
       - name: Upload signed release APK
