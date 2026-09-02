@@ -24,7 +24,19 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
   }
 
   double _number(TextEditingController controller) {
-    return double.tryParse(controller.text.replaceAll(',', '').trim()) ?? 0;
+    final value = controller.text.trim().replaceAll(' ', '');
+    if (value.isEmpty) return 0;
+
+    // Support both 10.5 and 10,5 while retaining common grouped values such
+    // as 1,000. A comma followed by one or two digits is treated as decimal.
+    if (value.contains(',') && !value.contains('.')) {
+      final parts = value.split(',');
+      if (parts.length == 2 && parts.last.length <= 2) {
+        return double.tryParse('${parts.first}.${parts.last}') ?? 0;
+      }
+    }
+
+    return double.tryParse(value.replaceAll(',', '')) ?? 0;
   }
 
   Map<String, double> get projection {
@@ -33,27 +45,23 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
     final months = _number(_durationController).clamp(0, 600);
     final years = months / 12;
 
+    // Compound growth is undefined for this projection at or below -100%.
+    // Return unavailable values instead of silently showing a false zero loss.
+    if (compound && annualRate <= -1) {
+      return {'principal': principal, 'profit': double.nan, 'total': double.nan};
+    }
+
     final total = compound
-        ? principal * _pow(1 + annualRate, years)
+        ? principal * _compoundFactor(annualRate, months.toInt())
         : principal * (1 + annualRate * years);
     final profit = total - principal;
 
     return {'principal': principal, 'profit': profit, 'total': total};
   }
 
-  double _pow(double base, double exponent) {
-    // Monthly precision is enough for this projection UI and avoids
-    // introducing a package solely for a simple calculator.
-    if (exponent == 0) return 1;
-    final periods = (exponent * 12).round();
-    final monthlyRate = base == 0 ? 0 : base - 1;
-    return _compound(base, periods, monthlyRate);
-  }
-
-  double _compound(double base, int periods, double annualRate) {
-    if (periods <= 0) return 1;
-    final monthlyRate = annualRate / 12;
-    return _fastPower(1 + monthlyRate, periods);
+  double _compoundFactor(double annualRate, int months) {
+    if (months <= 0) return 1;
+    return _fastPower(1 + annualRate / 12, months);
   }
 
   double _fastPower(double base, int exponent) {
@@ -68,9 +76,9 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
     return result;
   }
 
-  String money(double value) => '\$${value.toStringAsFixed(2)}';
-
   void _recalculate() => setState(() {});
+
+  bool get invalidCompoundRate => compound && _number(_rateController) <= -100;
 
   @override
   Widget build(BuildContext context) {
@@ -115,9 +123,8 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
                     rateController: _rateController,
                     durationController: _durationController,
                     compound: compound,
-                    onCompoundChanged: (value) {
-                      setState(() => compound = value);
-                    },
+                    invalidCompoundRate: invalidCompoundRate,
+                    onCompoundChanged: (value) => setState(() => compound = value),
                     onChanged: _recalculate,
                   );
 
@@ -173,6 +180,7 @@ class _InputCard extends StatelessWidget {
   final TextEditingController rateController;
   final TextEditingController durationController;
   final bool compound;
+  final bool invalidCompoundRate;
   final ValueChanged<bool> onCompoundChanged;
   final VoidCallback onChanged;
 
@@ -181,6 +189,7 @@ class _InputCard extends StatelessWidget {
     required this.rateController,
     required this.durationController,
     required this.compound,
+    required this.invalidCompoundRate,
     required this.onCompoundChanged,
     required this.onChanged,
   });
@@ -197,7 +206,12 @@ class _InputCard extends StatelessWidget {
             const SizedBox(height: 18),
             _field('Investment amount', amountController, 'e.g. 1000'),
             const SizedBox(height: 14),
-            _field('Expected annual return (%)', rateController, 'e.g. 10'),
+            _field(
+              'Expected annual return (%)',
+              rateController,
+              'e.g. 10 or 10,5',
+              errorText: invalidCompoundRate ? 'Use a rate above -100% for compound growth.' : null,
+            ),
             const SizedBox(height: 14),
             _field('Duration (months)', durationController, 'e.g. 12'),
             const SizedBox(height: 8),
@@ -214,12 +228,22 @@ class _InputCard extends StatelessWidget {
     );
   }
 
-  Widget _field(String label, TextEditingController controller, String hint) {
+  Widget _field(
+    String label,
+    TextEditingController controller,
+    String hint, {
+    String? errorText,
+  }) {
     return TextField(
       controller: controller,
-      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true, signed: true),
       onChanged: (_) => onChanged(),
-      decoration: InputDecoration(labelText: label, hintText: hint, prefixIcon: const Icon(Icons.edit_outlined)),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        errorText: errorText,
+        prefixIcon: const Icon(Icons.edit_outlined),
+      ),
     );
   }
 }
@@ -231,8 +255,11 @@ class _ResultCard extends StatelessWidget {
 
   const _ResultCard({required this.principal, required this.profit, required this.total});
 
+  String _money(double value) => value.isFinite ? '\$${value.toStringAsFixed(2)}' : 'Unavailable';
+
   @override
   Widget build(BuildContext context) {
+    final valid = profit.isFinite && total.isFinite;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -241,15 +268,19 @@ class _ResultCard extends StatelessWidget {
           children: [
             const Text('Projected outcome', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
             const SizedBox(height: 18),
-            _row('Starting investment', '\$${principal.toStringAsFixed(2)}'),
+            _row('Starting investment', _money(principal)),
             const SizedBox(height: 12),
-            _row('Projected profit', '\$${profit.toStringAsFixed(2)}', positive: profit >= 0),
+            _row('Projected profit', _money(profit), positive: valid && profit >= 0),
             const Divider(height: 28),
             const Text('Estimated total value', style: TextStyle(color: OrenzaColors.slate, fontSize: 12)),
             const SizedBox(height: 5),
             Text(
-              '\$${total.toStringAsFixed(2)}',
-              style: const TextStyle(color: OrenzaColors.forest, fontSize: 30, fontWeight: FontWeight.w900),
+              _money(total),
+              style: TextStyle(
+                color: valid ? OrenzaColors.forest : OrenzaColors.slate,
+                fontSize: 30,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ],
         ),
@@ -261,7 +292,13 @@ class _ResultCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Text(label, style: const TextStyle(color: OrenzaColors.slate, fontSize: 12))),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w900, color: positive ? OrenzaColors.success : OrenzaColors.charcoal)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: positive ? OrenzaColors.success : OrenzaColors.charcoal,
+          ),
+        ),
       ],
     );
   }
