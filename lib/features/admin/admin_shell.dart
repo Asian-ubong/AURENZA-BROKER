@@ -174,7 +174,7 @@ class _AdminDesktopSidebar extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'AURENZA',
+                        'ORANZO',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -183,7 +183,7 @@ class _AdminDesktopSidebar extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'ADMIN CONTROL',
+                        'ADMIN',
                         style: TextStyle(
                           color: Colors.white60,
                           fontSize: 10,
@@ -243,7 +243,7 @@ class _AdminDesktopSidebar extends StatelessWidget {
                   ),
                   SizedBox(width: 8),
                   Text(
-                    'AUTHORIZED ADMIN AREA',
+                    'PRIVATE ADMIN AREA',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 10,
@@ -287,7 +287,7 @@ class _AdminPage extends StatelessWidget {
                 const Spacer(),
                 const Chip(
                   avatar: Icon(Icons.shield_outlined, size: 16),
-                  label: Text('Admin'),
+                  label: Text('Private Admin'),
                 ),
               ],
             ),
@@ -324,12 +324,12 @@ class _AdminOverview extends StatelessWidget {
       padding: const EdgeInsets.all(28),
       children: [
         const Text(
-          'AURENZA Admin Control Center',
+          'ORANZO ADMIN CONTROL CENTER',
           style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 8),
         const Text(
-          'Company treasury is separated from every customer wallet. '
+          'Private operations console. Company treasury is separated from every customer wallet. '
           'Finance monitoring is tied to the exact authenticated customer wallet.',
         ),
         const SizedBox(height: 24),
@@ -371,12 +371,11 @@ class _AdminOverview extends StatelessWidget {
         const SizedBox(height: 24),
         const Card(
           child: ListTile(
-            leading: Icon(Icons.info_outline, color: AurenzaColors.gold),
-            title: Text('Finance safety boundary'),
+            leading: Icon(Icons.lock_outline, color: AurenzaColors.gold),
+            title: Text('Private admin boundary'),
             subtitle: Text(
-              'The admin Finance screen never treats a company balance as a '
-              'customer balance. Withdrawal workflows must resolve the '
-              'requesting user ID to that exact user wallet before approval.',
+              'Only authenticated users with an authorized admin role can enter this console. '
+              'Backend RLS and secure RPC authorization remain the final enforcement layer.',
             ),
           ),
         ),
@@ -423,7 +422,7 @@ class _AdminDeniedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('AURENZA Admin')),
+      appBar: AppBar(title: const Text('ORANZO ADMIN')),
       body: const Center(
         child: Padding(
           padding: EdgeInsets.all(32),
@@ -433,13 +432,15 @@ class _AdminDeniedScreen extends StatelessWidget {
               Icon(Icons.lock_outline, size: 56, color: AurenzaColors.gold),
               SizedBox(height: 18),
               Text(
-                'Admin access required',
+                'Private admin access required',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
               Text(
                 'Your authenticated account does not have an authorized '
-                'AURENZA admin role.',
+                'ORANZO ADMIN role.',
+                textAlign: TextAlign.center,
               ),
             ],
           ),
