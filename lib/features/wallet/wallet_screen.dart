@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/theme/aurenza_colors.dart';
 import '../../core/theme/aurenza_theme.dart';
 import '../../core/widgets/system_states.dart';
 
@@ -104,7 +105,11 @@ class _WalletScreenState extends State<WalletScreen> {
             wallet.n('reserved_balance', 'reserved'),
             Icons.lock_outline,
           ),
-          ('Sandbox capital', wallet.n('sandbox_capital'), Icons.shield_outlined),
+          (
+            'Sandbox capital',
+            wallet.n('sandbox_capital'),
+            Icons.shield_outlined,
+          ),
           (
             'Trading balance',
             wallet.n('trading_balance', 'balance'),
@@ -128,7 +133,7 @@ class _WalletScreenState extends State<WalletScreen> {
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
-                    colors: [AurenzaColors.forest, AurenzaColors.forestGreen],
+                    colors: [AurenzaColors.forest, AurenzaColors.green],
                   ),
                   borderRadius: BorderRadius.circular(22),
                 ),
@@ -159,7 +164,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           ? 'SANDBOX MODE — backend controlled'
                           : 'LIVE ACCOUNT',
                       style: const TextStyle(
-                        color: AurenzaColors.softGold,
+                        color: AurenzaColors.goldSoft,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -196,7 +201,7 @@ class _WalletScreenState extends State<WalletScreen> {
                                         Text(
                                           item.$1,
                                           style: const TextStyle(
-                                            color: AurenzaColors.slate,
+                                            color: AurenzaColors.muted,
                                             fontSize: 11,
                                           ),
                                         ),
@@ -241,7 +246,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           padding: EdgeInsets.symmetric(vertical: 18),
                           child: Text(
                             'No balance movements returned by the backend yet.',
-                            style: TextStyle(color: AurenzaColors.slate),
+                            style: TextStyle(color: AurenzaColors.muted),
                           ),
                         ),
                       ]
