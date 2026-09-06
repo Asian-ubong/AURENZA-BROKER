@@ -60,6 +60,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Generate web platform when missing
+        run: |
+          if [ ! -d "web" ]; then
+            flutter create --platforms=web --project-name=oranzo_admin --org=com.oranzo .
+          fi
+
       - name: Build web
         run: flutter build web --release
 
