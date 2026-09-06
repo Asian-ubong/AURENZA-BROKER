@@ -5,16 +5,16 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:oranzo_admin/features/admin/admin_finance_screen.dart';
 
 void main() {
+  setUpAll(() async {
+    await Supabase.initialize(
+      url: 'https://example.supabase.co',
+      publishableKey: 'test-publishable-key',
+    );
+  });
+
   testWidgets(
     'finance screen does not fabricate wallet data when backend is unavailable',
     (tester) async {
-      if (!Supabase.instance.isInitialized) {
-        await Supabase.initialize(
-          url: 'https://example.supabase.co',
-          publishableKey: 'test-publishable-key',
-        );
-      }
-
       await tester.pumpWidget(
         const MaterialApp(home: AdminFinanceScreen()),
       );
