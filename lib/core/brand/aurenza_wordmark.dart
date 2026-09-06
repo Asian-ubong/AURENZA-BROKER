@@ -18,7 +18,7 @@ class AurenzaWordmark extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'AURENZA',
+              'ORANZO',
               style: TextStyle(
                 color: AurenzaColors.forest,
                 fontSize: 18,
@@ -28,7 +28,7 @@ class AurenzaWordmark extends StatelessWidget {
             ),
             if (!compact)
               const Text(
-                'BROKER',
+                'ADMIN',
                 style: TextStyle(
                   color: AurenzaColors.gold,
                   fontSize: 9,
