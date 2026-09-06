@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aurenza_broker/features/wallet/wallet_screen.dart';
+import 'package:oranzo_admin/features/wallet/wallet_screen.dart';
 
 void main() {
   test('wallet snapshot parses backend values', () {
