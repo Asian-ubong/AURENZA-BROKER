@@ -30,7 +30,7 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
   Map<String, double> get projection {
     final principal = _number(_amountController);
     final annualRate = _number(_rateController) / 100;
-    final months = _number(_durationController).clamp(0, 600);
+    final months = _number(_durationController).clamp(0, 600).toDouble();
     final years = months / 12;
 
     final total = compound
@@ -42,18 +42,15 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
   }
 
   double _pow(double base, double exponent) {
-    // Monthly precision is enough for this projection UI and avoids
-    // introducing a package solely for a simple calculator.
     if (exponent == 0) return 1;
     final periods = (exponent * 12).round();
-    final monthlyRate = base == 0 ? 0 : base - 1;
-    return _compound(base, periods, monthlyRate);
+    final monthlyRate = base - 1;
+    return _compound(periods, monthlyRate);
   }
 
-  double _compound(double base, int periods, double annualRate) {
+  double _compound(int periods, double annualRate) {
     if (periods <= 0) return 1;
-    final monthlyRate = annualRate / 12;
-    return _fastPower(1 + monthlyRate, periods);
+    return _fastPower(1 + annualRate / 12, periods);
   }
 
   double _fastPower(double base, int exponent) {
@@ -67,8 +64,6 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
     }
     return result;
   }
-
-  String money(double value) => '\$${value.toStringAsFixed(2)}';
 
   void _recalculate() => setState(() {});
 
@@ -109,25 +104,21 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
               const SizedBox(height: 22),
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 720;
                   final form = _InputCard(
                     amountController: _amountController,
                     rateController: _rateController,
                     durationController: _durationController,
                     compound: compound,
-                    onCompoundChanged: (value) {
-                      setState(() => compound = value);
-                    },
+                    onCompoundChanged: (value) => setState(() => compound = value),
                     onChanged: _recalculate,
                   );
-
                   final result = _ResultCard(
                     principal: principal,
                     profit: profit,
                     total: total,
                   );
 
-                  if (wide) {
+                  if (constraints.maxWidth >= 720) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -137,7 +128,6 @@ class _InvestmentProfitScreenState extends State<InvestmentProfitScreen> {
                       ],
                     );
                   }
-
                   return Column(children: [form, const SizedBox(height: 16), result]);
                 },
               ),
@@ -219,7 +209,11 @@ class _InputCard extends StatelessWidget {
       controller: controller,
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       onChanged: (_) => onChanged(),
-      decoration: InputDecoration(labelText: label, hintText: hint, prefixIcon: const Icon(Icons.edit_outlined)),
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: const Icon(Icons.edit_outlined),
+      ),
     );
   }
 }
@@ -261,7 +255,13 @@ class _ResultCard extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: Text(label, style: const TextStyle(color: OrenzaColors.slate, fontSize: 12))),
-        Text(value, style: TextStyle(fontWeight: FontWeight.w900, color: positive ? OrenzaColors.success : OrenzaColors.charcoal)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w900,
+            color: positive ? OrenzaColors.success : OrenzaColors.charcoal,
+          ),
+        ),
       ],
     );
   }
