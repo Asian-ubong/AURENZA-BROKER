@@ -19,13 +19,13 @@ Future<void> main() async {
   } catch (error) {
     debugPrint('ORANZO ADMIN: Supabase initialization failed: $error');
   }
-  runApp(AurenzaApp(backendReady: ready));
+  runApp(OranzoAdminApp(backendReady: ready));
 }
 
-class AurenzaApp extends StatelessWidget {
+class OranzoAdminApp extends StatelessWidget {
   final bool backendReady;
 
-  const AurenzaApp({super.key, required this.backendReady});
+  const OranzoAdminApp({super.key, required this.backendReady});
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +33,8 @@ class AurenzaApp extends StatelessWidget {
       title: 'ORANZO ADMIN',
       debugShowCheckedModeBanner: false,
       theme: AurenzaTheme.light(),
+      darkTheme: AurenzaTheme.dark(),
+      themeMode: ThemeMode.system,
       home: backendReady
           ? const BrokerShell()
           : const BackendUnavailableScreen(),
@@ -100,6 +102,7 @@ class _BrokerShellState extends State<BrokerShell> {
   ];
 
   void openAdmin() {
+    if (!AurenzaAdminAccess.isAdmin) return;
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => const AdminShell()),
     );
@@ -163,6 +166,7 @@ class _BrokerShellState extends State<BrokerShell> {
                 if (AurenzaAdminAccess.isAdmin)
                   IconButton(
                     onPressed: openAdmin,
+                    tooltip: 'Admin Console',
                     icon: const Icon(Icons.admin_panel_settings_outlined),
                   ),
                 IconButton(
@@ -230,7 +234,7 @@ class _Side extends StatelessWidget {
               child: Row(
                 children: [
                   Icon(
-                    Icons.diamond_outlined,
+                    Icons.admin_panel_settings_outlined,
                     color: AurenzaColors.gold,
                     size: 28,
                   ),
