@@ -62,15 +62,16 @@ A module is complete only when these are satisfied:
 ## Automation status
 
 <!-- CI_STATUS_START -->
-- Last CI update: pending first successful run
-- Last commit checked: pending
-- Quality checks: pending
-- Tests: pending
-- Web build: pending
+- Last CI update: 2026-09-06 10:56 UTC
+- Last commit checked: `d5297ad6f0a4`
+- Workflow run: `1`
+- Quality checks: cancelled
+- Tests: cancelled
+- Web build: cancelled
 <!-- CI_STATUS_END -->
 
 ## Change log
 
 <!-- CHANGELOG_START -->
-CI will append the latest verified commit here. Manual product decisions should be recorded above or in the relevant module documentation.
+- 2026-09-06 10:56 UTC — CI cancelled — commit `d5297ad6f0a4` — workflow run `1`
 <!-- CHANGELOG_END -->
