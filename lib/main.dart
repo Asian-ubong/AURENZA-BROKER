@@ -35,28 +35,9 @@ class OranzoAdminApp extends StatelessWidget {
       theme: AurenzaTheme.light(),
       darkTheme: AurenzaTheme.dark(),
       themeMode: ThemeMode.system,
-      home: backendReady
-          ? const BrokerShell()
-          : const BackendUnavailableScreen(),
-    );
-  }
-}
-
-class BackendUnavailableScreen extends StatelessWidget {
-  const BackendUnavailableScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: AppError(
-            message:
-                'ORANZO ADMIN could not connect to its backend.\n\nConfigure Supabase and restart the application.',
-            onRetry: main,
-          ),
-        ),
-      ),
+      // The UI must remain visible even when backend configuration is absent.
+      // Backend-dependent screens already expose their own unavailable state.
+      home: const BrokerShell(),
     );
   }
 }
@@ -123,9 +104,7 @@ class _BrokerShellState extends State<BrokerShell> {
                   (index) => setState(() => selectedIndex = index),
                   AurenzaAdminAccess.isAdmin ? openAdmin : null,
                 ),
-                Expanded(
-                  child: _Page(titles[selectedIndex], selectedIndex),
-                ),
+                Expanded(child: _Page(titles[selectedIndex], selectedIndex)),
               ],
             );
           }
@@ -151,9 +130,7 @@ class _BrokerShellState extends State<BrokerShell> {
                       ),
                   ],
                 ),
-                Expanded(
-                  child: _Page(titles[selectedIndex], selectedIndex),
-                ),
+                Expanded(child: _Page(titles[selectedIndex], selectedIndex)),
               ],
             );
           }
@@ -193,10 +170,7 @@ class _BrokerShellState extends State<BrokerShell> {
                   icon: Icon(Icons.show_chart_outlined),
                   label: 'Markets',
                 ),
-                NavigationDestination(
-                  icon: Icon(Icons.menu),
-                  label: 'More',
-                ),
+                NavigationDestination(icon: Icon(Icons.menu), label: 'More'),
               ],
             ),
           );
@@ -342,7 +316,9 @@ class _Page extends StatelessWidget {
               const SizedBox(height: 16),
               Text(title, style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 8),
-              const Text('Module foundation ready for backend implementation.'),
+              const Text(
+                'Module foundation ready for backend implementation.',
+              ),
             ],
           ),
         );
