@@ -1,0 +1,45 @@
+name: AURENZA CI Notes
+
+on:
+  workflow_run:
+    workflows: ["AURENZA CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  update-notes:
+    name: Update CI notes
+    if: ${{ github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Update progress notes
+        env:
+          CI_STATUS: ${{ github.event.workflow_run.conclusion }}
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_RUN_NUMBER: ${{ github.event.workflow_run.run_number }}
+        run: python scripts/update_ci_notes.py
+
+      - name: Commit notes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/module-progress.md
+          if git diff --cached --quiet; then
+            echo "No CI note changes to commit."
+            exit 0
+          fi
+          git commit -m "docs: update CI status [skip ci]"
+          git push origin main
