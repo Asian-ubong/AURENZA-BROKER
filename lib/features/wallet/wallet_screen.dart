@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/theme/aurenza_colors.dart';
-import '../../core/theme/aurenza_theme.dart';
 import '../../core/widgets/system_states.dart';
 
 class WalletSnapshot {
