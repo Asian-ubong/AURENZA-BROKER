@@ -17,7 +17,7 @@ Future<void> main() async {
   try {
     ready = await AurenzaSupabase.initialize();
   } catch (error) {
-    debugPrint('Supabase initialization failed: $error');
+    debugPrint('ORANZO ADMIN: Supabase initialization failed: $error');
   }
   runApp(AurenzaApp(backendReady: ready));
 }
@@ -30,7 +30,7 @@ class AurenzaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'AURENZA Broker',
+      title: 'ORANZO ADMIN',
       debugShowCheckedModeBanner: false,
       theme: AurenzaTheme.light(),
       home: backendReady
@@ -50,7 +50,7 @@ class BackendUnavailableScreen extends StatelessWidget {
         child: Center(
           child: AppError(
             message:
-                'AURENZA could not connect to its backend.\n\nConfigure Supabase and restart the application.',
+                'ORANZO ADMIN could not connect to its backend.\n\nConfigure Supabase and restart the application.',
             onRetry: main,
           ),
         ),
@@ -236,7 +236,7 @@ class _Side extends StatelessWidget {
                   ),
                   SizedBox(width: 10),
                   Text(
-                    'AURENZA',
+                    'ORANZO ADMIN',
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
