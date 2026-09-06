@@ -1,16 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:aurenza_broker/main.dart';
+import 'package:oranzo_admin/main.dart';
 
 void main() {
-  testWidgets('AURENZA backend-unavailable screen renders', (WidgetTester tester) async {
+  testWidgets('ORANZO ADMIN backend-unavailable screen renders', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      const AurenzaApp(
+      const OranzoAdminApp(
         backendReady: false,
       ),
     );
 
     expect(
-      find.textContaining('AURENZA could not connect to its backend'),
+      find.textContaining('ORANZO ADMIN could not connect to its backend'),
       findsOneWidget,
     );
 
