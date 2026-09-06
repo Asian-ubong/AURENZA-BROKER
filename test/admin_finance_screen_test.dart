@@ -14,7 +14,6 @@ void main() {
 
       expect(find.byType(AdminFinanceScreen), findsOneWidget);
     },
-    skip:
-        'Supabase native storage is unavailable in the Flutter test runner; production access is enforced by auth/RLS.',
+    skip: true,
   );
 }
