@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:oranzo_admin/main.dart';
 
 void main() {
-  testWidgets('ORANZO ADMIN backend-unavailable screen renders', (
+  testWidgets('ORANZO ADMIN shell renders when backend is unavailable', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
@@ -11,14 +11,8 @@ void main() {
       ),
     );
 
-    expect(
-      find.textContaining('ORANZO ADMIN could not connect to its backend'),
-      findsOneWidget,
-    );
-
-    expect(
-      find.textContaining('Configure Supabase and restart the application'),
-      findsOneWidget,
-    );
+    expect(find.text('ORANZO ADMIN'), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Wallet'), findsOneWidget);
   });
 }
