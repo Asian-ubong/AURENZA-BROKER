@@ -1,5 +1,5 @@
-name: aurenza_broker
-description: "AURENZA Broker — premium multi-asset broker application."
+name: oranzo_admin
+description: "ORANZO ADMIN — master trading, finance, operations, and administration platform."
 publish_to: 'none'
 
 version: 0.2.0+2
