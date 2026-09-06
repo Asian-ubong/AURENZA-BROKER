@@ -1,4 +1,4 @@
-name: AURENZA BROKER - Build Signed Android APK
+name: ORANZO ADMIN - Android Release
 
 on:
   push:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-android:
-    name: Build AURENZA Android APK
+    name: Build ORANZO ADMIN Android APK
     runs-on: ubuntu-latest
 
     env:
@@ -20,7 +20,7 @@ jobs:
       KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
 
     steps:
-      - name: Checkout AURENZA
+      - name: Checkout ORANZO ADMIN
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -45,16 +45,26 @@ jobs:
           if [ ! -d android ]; then
             flutter create \
               --platforms=android \
-              --project-name=aurenza_broker \
-              --org=com.example \
+              --project-name=oranzo_admin \
+              --org=com.oranzo \
               .
           fi
+
+      - name: Apply ORANZO Android identity
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          manifest = Path('android/app/src/main/AndroidManifest.xml')
+          text = manifest.read_text()
+          text = text.replace('android:label="oranzo_admin"', 'android:label="ORANZO ADMIN"')
+          manifest.write_text(text)
+          PY
 
       - name: Get dependencies
         run: flutter pub get
 
       - name: Format Dart source
-        run: dart format lib test
+        run: dart format --output=none --set-exit-if-changed lib test
 
       - name: Analyze Dart source
         run: flutter analyze
@@ -81,30 +91,24 @@ jobs:
             exit 1
           fi
 
-          echo "Generating release keystore on GitHub runner..."
-
+          echo "Generating CI release keystore..."
           keytool -genkeypair \
-            -keystore android/app/aurenza-upload-key.jks \
+            -keystore android/app/oranzo-upload-key.jks \
             -alias "$KEY_ALIAS" \
             -keyalg RSA \
             -keysize 2048 \
             -validity 10000 \
             -storepass "$KEYSTORE_PASSWORD" \
             -keypass "$KEY_PASSWORD" \
-            -dname "CN=AURENZA, OU=Engineering, O=AURENZA, L=Benin City, ST=Edo, C=NG"
+            -dname "CN=ORANZO ADMIN, OU=Engineering, O=ORANZO ADMIN, L=Benin City, ST=Edo, C=NG"
 
-          test -s android/app/aurenza-upload-key.jks
-
-          echo "Keystore generated successfully."
+          test -s android/app/oranzo-upload-key.jks
 
       - name: Build release APK
         run: |
           flutter clean
           flutter pub get
-
-          flutter build apk \
-            --release \
-            --build-number=${{ github.run_number }}
+          flutter build apk --release --build-number=${{ github.run_number }}
 
       - name: Sign release APK
         env:
@@ -113,19 +117,13 @@ jobs:
           SIGNING_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           APK="build/app/outputs/flutter-apk/app-release.apk"
-
           test -f "$APK"
 
-          APKSIGNER=$(find "$ANDROID_HOME/build-tools" \
-            -type f \
-            -name apksigner \
-            | sort -V \
-            | tail -n 1)
-
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -n 1)
           test -x "$APKSIGNER"
 
           "$APKSIGNER" sign \
-            --ks android/app/aurenza-upload-key.jks \
+            --ks android/app/oranzo-upload-key.jks \
             --ks-key-alias "$SIGNING_KEY_ALIAS" \
             --ks-pass "pass:$SIGNING_STORE_PASSWORD" \
             --key-pass "pass:$SIGNING_KEY_PASSWORD" \
@@ -133,43 +131,34 @@ jobs:
             "$APK"
 
           mv "$APK.signed" "$APK"
-
           "$APKSIGNER" verify --verbose "$APK"
 
       - name: Prepare release artifacts
         run: |
           mkdir -p release
-
-          cp \
-            build/app/outputs/flutter-apk/app-release.apk \
-            release/AURENZA-BROKER-release.apk
-
-          sha256sum \
-            release/AURENZA-BROKER-release.apk \
-            > release/AURENZA-BROKER-release.apk.sha256
-
+          cp build/app/outputs/flutter-apk/app-release.apk release/ORANZO-ADMIN-release.apk
+          sha256sum release/ORANZO-ADMIN-release.apk > release/ORANZO-ADMIN-release.apk.sha256
           ls -lh release/
+          cat release/ORANZO-ADMIN-release.apk.sha256
 
-          cat release/AURENZA-BROKER-release.apk.sha256
-
-      - name: Upload signed release APK
+      - name: Upload signed ORANZO ADMIN APK
         uses: actions/upload-artifact@v4
         with:
-          name: AURENZA-BROKER-release
-          path: release/AURENZA-BROKER-release.apk
+          name: ORANZO-ADMIN-release
+          path: release/ORANZO-ADMIN-release.apk
           if-no-files-found: error
           retention-days: 30
 
       - name: Upload SHA256
         uses: actions/upload-artifact@v4
         with:
-          name: AURENZA-BROKER-release-sha256
-          path: release/AURENZA-BROKER-release.apk.sha256
+          name: ORANZO-ADMIN-release-sha256
+          path: release/ORANZO-ADMIN-release.apk.sha256
           if-no-files-found: error
           retention-days: 30
 
       - name: Cleanup signing files
         if: always()
         run: |
-          rm -f android/app/aurenza-upload-key.jks
+          rm -f android/app/oranzo-upload-key.jks
           rm -f android/key.properties
