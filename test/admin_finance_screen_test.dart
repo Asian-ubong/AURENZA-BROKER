@@ -1,17 +1,21 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:aurenza_broker/features/admin/admin_finance_screen.dart';
 
 void main() {
-  testWidgets('finance screen exposes separate company and user wallet areas', (tester) async {
-    await tester.pumpWidget(
-      const MaterialApp(home: AdminFinanceScreen()),
-    );
+  testWidgets('finance screen does not fabricate wallet data when backend is unavailable', (tester) async {
+    if (!Supabase.instance.isInitialized) {
+      await Supabase.initialize(
+        url: 'https://example.supabase.co',
+        anonKey: 'test-anon-key',
+      );
+    }
 
-    await tester.pump();
+    await tester.pumpWidget(const MaterialApp(home: AdminFinanceScreen()));
+    await tester.pumpAndSettle();
+
     expect(find.text('Company & User Wallets'), findsOneWidget);
-    expect(find.text('COMPANY WALLET'), findsOneWidget);
-    expect(find.text('User Wallets'), findsNothing);
+    expect(find.textContaining('Backend wallet data is not available yet'), findsOneWidget);
   });
 }
