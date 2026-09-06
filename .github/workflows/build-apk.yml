@@ -52,6 +52,13 @@ jobs:
           text = manifest.read_text()
           text = text.replace('android:label="oranzo_admin"', 'android:label="ORANZO ADMIN"')
           manifest.write_text(text)
+
+          gradle = Path('android/app/build.gradle.kts')
+          if gradle.exists():
+              text = gradle.read_text()
+              text = text.replace('namespace = "com.oranzo.oranzo_admin"', 'namespace = "com.oranzo.admin"')
+              text = text.replace('applicationId = "com.oranzo.oranzo_admin"', 'applicationId = "com.oranzo.admin"')
+              gradle.write_text(text)
           PY
 
       - name: Get dependencies
