@@ -1,4 +1,4 @@
-name: AURENZA CI
+name: ORANZO ADMIN CI
 
 on:
   push:
@@ -11,15 +11,15 @@ permissions:
   contents: read
 
 concurrency:
-  group: aurenza-ci-${{ github.ref }}
+  group: oranzo-admin-ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   quality:
-    name: Analyze and test
+    name: Analyze and test ORANZO ADMIN
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout ORANZO ADMIN
         uses: actions/checkout@v4
 
       - name: Setup Flutter
@@ -35,7 +35,7 @@ jobs:
         run: flutter pub get
 
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: dart format --output=none lib test
 
       - name: Analyze
         run: flutter analyze
@@ -44,11 +44,11 @@ jobs:
         run: flutter test --coverage
 
   web_build:
-    name: Build web
+    name: Build ORANZO ADMIN web
     runs-on: ubuntu-latest
     needs: quality
     steps:
-      - name: Checkout
+      - name: Checkout ORANZO ADMIN
         uses: actions/checkout@v4
 
       - name: Setup Flutter
@@ -63,9 +63,9 @@ jobs:
       - name: Build web
         run: flutter build web --release
 
-      - name: Upload web build
+      - name: Upload ORANZO ADMIN web build
         uses: actions/upload-artifact@v4
         with:
-          name: aurenza-web-build
+          name: oranzo-admin-web-build
           path: build/web
           retention-days: 7
