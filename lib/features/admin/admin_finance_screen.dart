@@ -161,14 +161,14 @@ class _UserWalletTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final initial = (user['display_name'] ?? 'U')
+        .toString()
+        .substring(0, 1)
+        .toUpperCase();
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
       child: ExpansionTile(
-        leading: CircleAvatar(
-          child: Text(
-            '${(user['display_name'] ?? 'U').toString().substring(0, 1).toUpperCase()}',
-          ),
-        ),
+        leading: CircleAvatar(child: Text(initial)),
         title: Text(user['display_name']?.toString() ?? 'User'),
         subtitle: Text(
           user['email']?.toString() ??
@@ -184,8 +184,18 @@ class _UserWalletTile extends StatelessWidget {
           Row(
             children: [
               Expanded(child: _stat('Wallet ID', user['wallet_id'])),
-              Expanded(child: _stat('Available', '\$${n('available_balance').toStringAsFixed(2)}')),
-              Expanded(child: _stat('Withdrawable', '\$${n('withdrawable_balance').toStringAsFixed(2)}')),
+              Expanded(
+                child: _stat(
+                  'Available',
+                  '\$${n('available_balance').toStringAsFixed(2)}',
+                ),
+              ),
+              Expanded(
+                child: _stat(
+                  'Withdrawable',
+                  '\$${n('withdrawable_balance').toStringAsFixed(2)}',
+                ),
+              ),
             ],
           ),
         ],
@@ -197,9 +207,15 @@ class _UserWalletTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 11, color: AurenzaColors.muted)),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 11, color: AurenzaColors.muted),
+        ),
         const SizedBox(height: 4),
-        Text(value?.toString() ?? '—', style: const TextStyle(fontWeight: FontWeight.w800)),
+        Text(
+          value?.toString() ?? '—',
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
       ],
     );
   }
