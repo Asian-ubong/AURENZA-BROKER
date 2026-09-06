@@ -63,8 +63,8 @@ A module is complete only when these are satisfied:
 
 <!-- CI_STATUS_START -->
 - Last CI update: 2026-09-06 12:23 UTC
-- Last commit checked: `d8084828adb5`
-- Workflow run: `27`
+- Last commit checked: `1e63870128a2`
+- Workflow run: `28`
 - Quality checks: cancelled
 - Tests: cancelled
 - Web build: cancelled
@@ -73,6 +73,7 @@ A module is complete only when these are satisfied:
 ## Change log
 
 <!-- CHANGELOG_START -->
+- 2026-09-06 12:23 UTC — CI cancelled — commit `1e63870128a2` — workflow run `28`
 - 2026-09-06 12:23 UTC — CI cancelled — commit `d8084828adb5` — workflow run `27`
 - 2026-09-06 12:23 UTC — CI cancelled — commit `ea172cb73d0d` — workflow run `26`
 - 2026-09-06 12:22 UTC — CI cancelled — commit `7dffa5ca7a63` — workflow run `25`
