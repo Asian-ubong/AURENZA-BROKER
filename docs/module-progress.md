@@ -62,17 +62,18 @@ A module is complete only when these are satisfied:
 ## Automation status
 
 <!-- CI_STATUS_START -->
-- Last CI update: 2026-09-06 11:09 UTC
-- Last commit checked: `cbccdd4889a7`
-- Workflow run: `5`
-- Quality checks: cancelled
-- Tests: cancelled
-- Web build: cancelled
+- Last CI update: 2026-09-06 11:10 UTC
+- Last commit checked: `26986cf34534`
+- Workflow run: `6`
+- Quality checks: failure
+- Tests: failure
+- Web build: failure
 <!-- CI_STATUS_END -->
 
 ## Change log
 
 <!-- CHANGELOG_START -->
+- 2026-09-06 11:10 UTC — CI failure — commit `26986cf34534` — workflow run `6`
 - 2026-09-06 11:09 UTC — CI cancelled — commit `cbccdd4889a7` — workflow run `5`
 - 2026-09-06 10:59 UTC — CI failure — commit `b83cc5d52e6b` — workflow run `3`
 - 2026-09-06 10:56 UTC — CI failure — commit `1b9a1a96171f` — workflow run `2`
