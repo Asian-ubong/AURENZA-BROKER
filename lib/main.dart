@@ -4,7 +4,6 @@ import 'core/backend/supabase_client.dart';
 import 'core/brand/aurenza_wordmark.dart';
 import 'core/theme/aurenza_colors.dart';
 import 'core/theme/aurenza_theme.dart';
-import 'core/widgets/app_error.dart';
 import 'features/admin/admin_access.dart';
 import 'features/admin/admin_shell.dart';
 import 'features/dashboard/dashboard_screen.dart';
